@@ -1,0 +1,17 @@
+{
+  "name": "ServisBot AI",
+  "short_name": "ServisBot",
+  "description": "Premium BSH Group Teknik Servis Botu",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
