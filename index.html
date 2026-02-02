@@ -1296,8 +1296,8 @@
             scheduleReminder: function (client, phone) {
                 const reminders = JSON.parse(localStorage.getItem(this.config.remindersKey) || "[]");
 
-                // Test için 10 saniye, Normalde: Date.now() + (48 * 60 * 60 * 1000)
-                const dueTime = Date.now() + 10000;
+                // 48 Saat Hatırlatıcı
+                const dueTime = Date.now() + (48 * 60 * 60 * 1000);
 
                 reminders.push({
                     id: Date.now(),
