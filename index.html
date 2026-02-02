@@ -201,6 +201,10 @@
                                 class="status-chip p-3 rounded-2xl border border-white/5 bg-slate-900/40 text-[9px] font-black text-purple-400 flex items-center justify-center gap-2 transition-all">
                                 <i data-lucide="shield-check" class="w-3 h-3"></i> GARANTİ
                             </button>
+                            <button onclick="app.setStatus('SURVEY', this)"
+                                class="status-chip p-3 rounded-2xl border border-white/5 bg-slate-900/40 text-[9px] font-black text-cyan-400 flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="star" class="w-3 h-3"></i> ANKET
+                            </button>
                         </div>
                         <input type="hidden" id="current-status" value="COMING">
                     </div>
@@ -242,6 +246,11 @@
                         <button id="whatsapp-btn" onclick="app.sendWhatsApp()"
                             class="btn-glow w-full bg-blue-600 hover:bg-blue-500 h-16 rounded-3xl font-black text-sm flex items-center justify-center gap-3 shadow-[0_15px_30px_-5px_rgba(37,99,235,0.4)] transition-all uppercase tracking-tight">
                             WHATSAPP MESAJI GÖNDER <i data-lucide="message-square" class="w-5 h-5"></i>
+                        </button>
+
+                        <button onclick="app.setReminder()"
+                            class="mb-3 w-full bg-slate-800/50 hover:bg-slate-800 h-12 rounded-2xl font-black text-[10px] text-slate-400 flex items-center justify-center gap-2 border border-white/5 transition-all uppercase tracking-widest">
+                            <i data-lucide="bell-plus" class="w-4 h-4"></i> 48 Saat Sonra Hatırlat
                         </button>
 
                         <div class="grid grid-cols-2 gap-3">
@@ -523,6 +532,53 @@
                 </div>
             </div>
 
+            <!-- History Detail Modal -->
+            <div id="history-detail-modal"
+                class="hidden fixed inset-0 z-[200] bg-[#020617]/95 backdrop-blur-xl animate-in fade-in duration-300 flex items-center justify-center px-4">
+                <div
+                    class="bg-[#0f172a] border border-white/10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative">
+                    <button onclick="document.getElementById('history-detail-modal').classList.add('hidden')"
+                        class="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-slate-400 hover:text-white">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+
+                    <div class="text-center mb-6">
+                        <div
+                            class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-400">
+                            <i data-lucide="file-text" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-white tracking-tight uppercase">İşlem Detayı</h3>
+                        <p id="modal-date" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                            ...</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                            <span
+                                class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Müşteri</span>
+                            <p id="modal-client" class="text-sm font-bold text-white">...</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                                <span
+                                    class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Cihaz</span>
+                                <p id="modal-device" class="text-xs font-bold text-slate-300">...</p>
+                            </div>
+                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                                <span
+                                    class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Durum</span>
+                                <p id="modal-type" class="text-xs font-bold text-slate-300">...</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                            <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Not
+                                / Detay</span>
+                            <p id="modal-note" class="text-xs font-medium text-slate-400 leading-relaxed">...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button onclick="app.resetStats()"
                 class="w-full py-4 rounded-3xl border border-white/5 text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-red-400 hover:bg-red-500/5 transition-all">
                 Aylık Metrikleri Sıfırla
@@ -677,7 +733,8 @@
                 customersKey: "servisbot_customers_v1",
                 partsLibKey: "servisbot_parts_v1",
                 statsKey: "servisbot_stats_v1",
-                lastSentKey: "servisbot_last_sent_v1"
+                lastSentKey: "servisbot_last_sent_v1",
+                remindersKey: "servisbot_reminders_v1"
             },
 
             messageTemplates: {
@@ -696,6 +753,10 @@
                 WARRANTY: {
                     normal: "Sayın {client}, {device} cihazınızdaki işlem garanti kapsamında değerlendirilmiştir. Herhangi bir ek ücret yansıtılmayacaktır. İyi günler dileriz.",
                     soft: "Değerli müşterimiz {client}, yaptığımız inceleme sonucunda {device} cihazınızdaki işlemin garanti şartları dahilinde olduğunu belirledik. Sizden herhangi bir servis bedeli talep edilmeyecektir. Sizin memnuniyetiniz bizim için önemli."
+                },
+                SURVEY: {
+                    normal: "Merhaba ben teknisyeniniz {tech}. Geçtiğimiz günlerde adresinizde gelip {device} cihazınız için servis hizmeti sağlamıştım. Telefonunuza mesajlar kısmından bir anket gelmiş olmalı, eğer hizmetimizden memnun kaldıysanız bize 10 puan vererek destek olur musunuz? Bu bizim için çok değerli. Cihazla ilgili bir sorunuz olursa bu numaradan bana ulaşabilirsiniz. İyi günler dilerim.",
+                    soft: "Değerli müşterimiz, ben teknisyeniniz {tech}. {device} cihazınız için gerçekleştirdiğimiz servis ziyaretimizle ilgili memnuniyetinizi ölçmek adına telefonunuza bir anket iletilecektir. Eğer sizi memnun edebildiysek anket üzerinden bize 10 puan verebilir misiniz? Desteğiniz bizim için çok kıymetli. Cihazınızla ilgili her türlü sorununuzda bu hattan bana doğrudan ulaşabilirsiniz. İyi günler dilerim."
                 }
             },
 
@@ -710,7 +771,8 @@
                     COMING: 'bg-blue-600',
                     COMPLETED: 'bg-green-600',
                     PENDING_PART: 'bg-orange-600',
-                    WARRANTY: 'bg-purple-600'
+                    WARRANTY: 'bg-purple-600',
+                    SURVEY: 'bg-cyan-600'
                 };
 
                 btn.classList.remove('bg-slate-900/40');
@@ -727,6 +789,15 @@
                 this.updateConnectionStatus();
                 window.addEventListener('online', () => this.updateConnectionStatus());
                 window.addEventListener('offline', () => this.updateConnectionStatus());
+
+                // Bildirim kontrolü başlat (Her 30 saniyede bir)
+                this.checkReminders();
+                setInterval(() => this.checkReminders(), 30000);
+
+                // Bildirim izni iste
+                if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                    Notification.requestPermission();
+                }
             },
 
             updateConnectionStatus: function () {
@@ -1200,6 +1271,94 @@
                 window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(messageText)}`;
             },
 
+            setReminder: function () {
+                const client = document.getElementById('customerName').value.trim();
+                const phone = document.getElementById('phoneInput').value.trim();
+
+                if (!client || !phone) {
+                    alert("Önce müşteri adı ve telefonunu girmelisin usta!");
+                    return;
+                }
+
+                if (Notification.permission !== "granted") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            this.scheduleReminder(client, phone);
+                        } else {
+                            alert("Bildirim izni vermezsen hatırlatamam usta.");
+                        }
+                    });
+                } else {
+                    this.scheduleReminder(client, phone);
+                }
+            },
+
+            scheduleReminder: function (client, phone) {
+                const reminders = JSON.parse(localStorage.getItem(this.config.remindersKey) || "[]");
+
+                // Test için 10 saniye, Normalde: Date.now() + (48 * 60 * 60 * 1000)
+                const dueTime = Date.now() + 10000;
+
+                reminders.push({
+                    id: Date.now(),
+                    client,
+                    phone,
+                    dueTime,
+                    status: 'PENDING'
+                });
+
+                localStorage.setItem(this.config.remindersKey, JSON.stringify(reminders));
+                alert(`Tamamdır! ${client} için hatırlatıcı kuruldu.`);
+
+                // Geçmişe de işaret koy (Eğer son kayıtsa)
+                this.updateHistoryWithReminder(client);
+            },
+
+            checkReminders: function () {
+                const reminders = JSON.parse(localStorage.getItem(this.config.remindersKey) || "[]");
+                const now = Date.now();
+                let updated = false;
+
+                reminders.forEach(r => {
+                    if (r.status === 'PENDING' && r.dueTime <= now) {
+                        // Bildirim Gönder
+                        this.sendNotification(`Hatırlatma: ${r.client}`, "48 Saat doldu! Müşteriye memnuniyet mesajı atma vakti geldi.");
+                        r.status = 'SENT';
+                        updated = true;
+
+                        // Sesli uyarı
+                        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                        audio.play().catch(e => console.log(e));
+                    }
+                });
+
+                if (updated) {
+                    localStorage.setItem(this.config.remindersKey, JSON.stringify(reminders));
+                }
+            },
+
+            sendNotification: function (title, body) {
+                if (Notification.permission === "granted") {
+                    new Notification("ServisBot AI - Hatırlatıcı", {
+                        body: body,
+                        icon: 'icon.png',
+                        vibrate: [200, 100, 200]
+                    });
+                }
+            },
+
+            updateHistoryWithReminder: function (client) {
+                // Son geçmiş kaydını bul ve remind bayrağı ekle
+                let history = JSON.parse(localStorage.getItem(this.config.storageKey) || "[]");
+                const index = history.findIndex(h => h.client === client || h.val.includes(client));
+
+                if (index !== -1) {
+                    history[index].hasReminder = true;
+                    localStorage.setItem(this.config.storageKey, JSON.stringify(history));
+                    this.renderHistory();
+                }
+            },
+
             prepareMessage: function () {
                 const client = document.getElementById('customerName').value.trim() || "Müşterimiz";
                 let device = document.getElementById('deviceType').value.trim();
@@ -1491,16 +1650,40 @@
                 }
             },
 
-            saveToHistory: function (type, val) {
+            saveToHistory: function (type, val, clientOverride = null) {
                 let history = JSON.parse(localStorage.getItem(this.config.storageKey) || "[]");
+
+                // Detay verileri formdan çek
+                const device = document.getElementById('deviceType').value.trim() || '---';
+                const noteContent = document.getElementById('note-content').value.trim() || 'Not yok.';
+                const client = clientOverride || document.getElementById('customerName').value.trim() || 'Bilinmeyen Müşteri';
+
                 const newItem = {
                     type,
                     val,
+                    client,     // Müşteri İsmi (Ayrı tutalım)
+                    device,     // Cihaz Detayı
+                    note: noteContent,   // Ekstra Notlar
+                    hasReminder: false,  // VarsayılanReminder yok
                     time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
                     date: new Date().toLocaleDateString('tr-TR')
                 };
                 history.unshift(newItem);
                 localStorage.setItem(this.config.storageKey, JSON.stringify(history.slice(0, 40)));
+            },
+
+            showHistoryDetail: function (idx) {
+                const data = JSON.parse(localStorage.getItem(this.config.storageKey) || "[]");
+                const item = data[idx];
+                if (!item) return;
+
+                document.getElementById('modal-date').textContent = `${item.date} - ${item.time}`;
+                document.getElementById('modal-client').textContent = item.client || item.val;
+                document.getElementById('modal-device').textContent = item.device || "---";
+                document.getElementById('modal-type').textContent = item.type;
+                document.getElementById('modal-note').textContent = item.note || "Ek not bulunmuyor.";
+
+                document.getElementById('history-detail-modal').classList.remove('hidden');
             },
 
             renderHistory: function () {
@@ -1516,11 +1699,18 @@
                     return;
                 }
 
-                list.innerHTML = data.map(item => `
-                    <div class="glass-card p-5 rounded-3xl flex justify-between items-center border-l-4 ${item.type.includes('📞') ? 'border-green-500' : 'border-indigo-500'} group active:scale-[0.98] transition-transform">
+                list.innerHTML = data.map((item, idx) => `
+                    <div onclick="app.showHistoryDetail(${idx})" 
+                        class="glass-card p-5 rounded-3xl flex justify-between items-center border-l-4 ${item.type.includes('📞') ? 'border-green-500' : 'border-indigo-500'} group cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden">
+                        
+                        ${item.hasReminder ? `<div class="absolute top-0 right-0 bg-blue-600 p-2 rounded-bl-2xl shadow-lg"><i data-lucide="bell" class="w-3 h-3 text-white animate-pulse"></i></div>` : ''}
+
                         <div>
-                            <p class="text-[9px] font-black opacity-30 uppercase tracking-widest mb-1">${item.type}</p>
-                            <p class="font-bold text-white text-base tracking-tight">${item.val}</p>
+                            <p class="text-[9px] font-black opacity-30 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                ${item.type}
+                            </p>
+                            <p class="font-bold text-white text-base tracking-tight">${item.client || item.val}</p>
+                            ${item.device ? `<p class="text-[9px] text-slate-500 font-bold uppercase mt-1">${item.device}</p>` : ''}
                         </div>
                         <div class="text-right">
                             <span class="text-[10px] font-black opacity-40 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/5 italic">${item.time}</span>
