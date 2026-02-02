@@ -413,10 +413,6 @@
                 <!-- Arama Sonuçları -->
                 <div id="testModeResults" class="space-y-4"></div>
             </section>
-
-
-
-            </section>
         </div>
 
         <!-- TEST KODLARI SAYFASI (YENİ) -->
@@ -810,6 +806,11 @@
                     statusDots.classList.remove('bg-blue-500', 'animate-pulse');
                     statusDots.classList.add('bg-slate-500');
                 }
+            },
+
+            syncOfflineData: function () {
+                // Çevrimdışı verileri senkronize et (Gelecekte genişletilebilir)
+                console.log("ServisBot AI - Çevrimdışı Senkronizasyon Kontrolü");
             },
 
             /**
