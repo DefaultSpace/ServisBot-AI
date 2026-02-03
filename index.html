@@ -312,9 +312,9 @@
                 <div id="results" class="space-y-4 transition-all duration-500"></div>
 
                 <!-- AI Desteği -->
-                <button onclick="app.askGemini()"
+                <button onclick="app.askAI()"
                     class="mt-6 w-full bg-white/5 border border-white/10 py-5 rounded-3xl font-black flex items-center justify-center gap-3 transition-all hover:bg-white/10 active:scale-95 text-indigo-300 tracking-wide">
-                    <i data-lucide="sparkles" class="w-5 h-5 animate-pulse"></i> GEMINI AI'YA DANIŞ
+                    <i data-lucide="sparkles" class="w-5 h-5 animate-pulse"></i> LLAMA 3.3 AI'YA DANIŞ
                 </button>
             </section>
         </div>
@@ -591,10 +591,10 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Gemini API
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">OpenRouter API
                         Anahtarı</label>
                     <div class="relative">
-                        <input id="setting-api-key" type="password" placeholder="AIza..."
+                        <input id="setting-api-key" type="password" placeholder="sk-or-v1-..."
                             class="w-full bg-slate-950/50 border border-white/5 p-5 rounded-3xl outline-none focus:border-blue-500 transition-all font-bold">
                         <button onclick="app.togglePassword('setting-api-key')"
                             class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">
@@ -742,7 +742,9 @@
                 partsLibKey: "servisbot_parts_v1",
                 statsKey: "servisbot_stats_v1",
                 lastSentKey: "servisbot_last_sent_v1",
-                remindersKey: "servisbot_reminders_v1"
+                remindersKey: "servisbot_reminders_v1",
+                aiUrl: "https://openrouter.ai/api/v1/chat/completions",
+                aiModel: "meta-llama/llama-3.3-70b-instruct:free"
             },
             discoveredModels: [],
 
@@ -808,29 +810,12 @@
                     Notification.requestPermission();
                 }
 
-                // AI Modellerini Keşfet
-                this.listModels();
+                this.logAiModel();
             },
 
-            listModels: async function () {
-                if (!this.settings?.apiKey) return;
-                console.log("ServisBot AI - Model Keşfi Başlatıldı...");
-                try {
-                    const url = `https://generativelanguage.googleapis.com/v1/models?key=${this.settings.apiKey.trim()}`;
-                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.discoveredModels = data.models
-                            ? data.models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => ({
-                                name: m.name.replace('models/', ''),
-                                api: 'v1'
-                            }))
-                            : [];
-                        console.log("KEŞFEDİLEN MODELLER:", this.discoveredModels.map(m => m.name));
-                    }
-                } catch (e) {
-                    console.warn("Model keşfi başarısız:", e.message);
-                }
+            // Model listeleme OpenRouter için basitleştirildi veya kaldırıldı
+            logAiModel: function () {
+                console.log(`ServisBot AI - Aktif Model: ${this.config.aiModel}`);
             },
 
             testAiConnection: async function () {
@@ -847,24 +832,31 @@
                 resultDiv.textContent = "BAĞLANTI TEST EDİLİYOR...";
 
                 try {
-                    const url = `https://generativelanguage.googleapis.com/v1/models?key=${apiKey}`;
-                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-                    const data = await response.json();
+                    const response = await fetch(this.config.aiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`,
+                            'HTTP-Referer': window.location.origin,
+                            'X-Title': 'ServisBot AI'
+                        },
+                        body: JSON.stringify({
+                            model: this.config.aiModel,
+                            messages: [{ role: 'user', content: 'Merhaba, sistem bağlantısını test etmek için bu bir deneme mesajıdır.' }],
+                            max_tokens: 10
+                        }),
+                        signal: AbortSignal.timeout(10000)
+                    });
 
-                    if (response.ok && data.models) {
-                        const models = data.models
-                            .filter(m => m.supportedGenerationMethods.includes('generateContent'))
-                            .map(m => m.name.replace('models/', ''));
-
+                    if (response.ok) {
                         resultDiv.classList.replace('text-slate-400', 'text-green-400');
                         resultDiv.classList.replace('bg-slate-900/50', 'bg-green-500/10');
-                        resultDiv.textContent = `BAĞLANTI BAŞARILI! ✅\n\nERİŞİLEBİLİR MODELLER:\n${models.join('\n')}`;
-
-                        // Güncel anahtarla modelleri güncelle
+                        resultDiv.textContent = "BAĞLANTI BAŞARILI! ✅\nOpenRouter Meta Llama 3.3 Sistemi Aktif.";
                         this.settings.apiKey = apiKey;
-                        this.listModels();
+                        localStorage.setItem(this.config.settingsKey, JSON.stringify(this.settings));
                     } else {
-                        throw new Error(data.error?.message || "Geçersiz Yanıt");
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error?.message || `Bağlantı Hatası: ${response.status}`);
                     }
                 } catch (e) {
                     resultDiv.classList.replace('text-slate-400', 'text-red-400');
@@ -1216,7 +1208,7 @@
             },
 
             loadSettings: function () {
-                const settings = JSON.parse(localStorage.getItem(this.config.settingsKey) || '{"techName": "H. EMREHAN", "apiKey": "AIzaSyCsbBWTBmjl25QVW6cuJpF9WgrCfIbFv4I"}');
+                const settings = JSON.parse(localStorage.getItem(this.config.settingsKey) || '{"techName": "H. EMREHAN", "apiKey": "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"}');
                 document.getElementById('technician-name-label').textContent = `TEKNİSYEN: ${settings.techName} `;
                 document.getElementById('profile-tech-name').textContent = settings.techName;
                 document.getElementById('setting-tech-name').value = settings.techName;
@@ -1567,7 +1559,7 @@
                 }
             },
 
-            askGemini: async function () {
+            askAI: async function () {
                 const query = document.getElementById('searchInput').value.trim();
                 const resultsDiv = document.getElementById('results');
 
@@ -1579,81 +1571,39 @@
                 resultsDiv.innerHTML = `
                     <div class="p-8 bg-indigo-500/10 border border-indigo-500/20 rounded-[2.5rem] flex items-center gap-5">
                         <div class="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
-                        <span class="text-xs font-black text-indigo-400 uppercase tracking-widest italic">AI Analiz Ediyor...</span>
+                        <span class="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Llama 3.3 Analiz Ediyor...</span>
                     </div>`;
 
                 const apiKeyToUse = (this.settings.apiKey || "").trim();
-                const tryAi = async (modelName, proxy = null, apiVersion = 'v1beta') => {
-                    const baseUrl = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${apiKeyToUse}`;
-                    const url = proxy ? `${proxy}${encodeURIComponent(baseUrl)}` : baseUrl;
-
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{
-                                    text: `Sen bir Bosch Siemens Profilo (BSH) teknik uzmanısın. Teknisyen ${this.settings.techName}'in şu sorusunu teknik bir dille, kısa ve çözüm odaklı madde madde yanıtla: "${query}".`
-                                }]
-                            }]
-                        }),
-                        signal: AbortSignal.timeout(12000)
-                    });
-                    return response;
-                };
 
                 try {
-                    const isLocalFile = window.location.protocol === 'file:';
-                    const proxies = [
-                        'https://api.codetabs.com/v1/proxy?quest=',
-                        'https://api.allorigins.win/raw?url=',
-                        'https://corsproxy.io/?',
-                        null
-                    ];
+                    const response = await fetch(this.config.aiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKeyToUse}`,
+                            'HTTP-Referer': window.location.origin,
+                            'X-Title': 'ServisBot AI'
+                        },
+                        body: JSON.stringify({
+                            model: this.config.aiModel,
+                            messages: [{
+                                role: 'user',
+                                content: `Sen bir Bosch Siemens Profilo (BSH) teknik uzmanısın. Teknisyen ${this.settings.techName}'in şu sorusunu teknik bir dille, kısa ve çözüm odaklı madde madde yanıtla: "${query}".`
+                            }]
+                        }),
+                        signal: AbortSignal.timeout(20000)
+                    });
 
-                    const models = [
-                        ...this.discoveredModels,
-                        { name: 'gemini-1.5-flash', api: 'v1' },
-                        { name: 'gemini-1.5-flash', api: 'v1beta' },
-                        { name: 'gemini-2.0-flash-exp', api: 'v1beta' }
-                    ];
-
-                    let response;
-                    let lastError;
-                    let successModel = null;
-
-                    for (const proxy of proxies) {
-                        if (successModel) break;
-                        if (isLocalFile && proxy === null) continue;
-
-                        for (const modelObj of models) {
-                            try {
-                                console.log(`AI Deneniyor: ${modelObj.name} (${proxy ? 'Proxy' : 'Direkt'})`);
-                                response = await tryAi(modelObj.name, proxy, modelObj.api);
-
-                                if (response.ok) {
-                                    successModel = modelObj.name;
-                                    break;
-                                } else {
-                                    const errData = await response.json().catch(() => ({}));
-                                    const errMsg = errData.error?.message || `HTTP ${response.status}`;
-                                    console.warn(`AI Teknik Log (${modelObj.name}): ${errMsg}`);
-                                    lastError = new Error(errMsg);
-                                }
-                            } catch (e) {
-                                console.error(`AI Bağlantı Log:`, e.message);
-                                lastError = e;
-                                continue;
-                            }
-                        }
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error?.message || `HTTP ${response.status}`);
                     }
 
-                    if (!successModel) throw lastError || new Error("Bağlantı kurulamadı.");
-
                     const data = await response.json();
-                    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error("Yanıt boş geldi.");
+                    if (!data.choices?.[0]?.message?.content) throw new Error("Yanıt boş geldi.");
 
-                    let aiText = data.candidates[0].content.parts[0].text;
+                    let aiText = data.choices[0].message.content;
                     aiText = aiText.replace(/\*/g, '').replace(/#/g, '');
 
                     resultsDiv.innerHTML = `
@@ -1665,7 +1615,7 @@
                                 <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
                                     <i data-lucide="brain-circuit" class="w-4 h-4"></i>
                                 </div>
-                                <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">AI Teknik Raporu</span>
+                                <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Meta Llama 3.3 Raporu</span>
                                 <span class="text-[8px] text-slate-600 italic">(Smart Engine)</span>
                             </div>
                             <div class="text-sm leading-relaxed font-bold text-slate-200 whitespace-pre-line">${aiText}</div>
@@ -1694,7 +1644,7 @@
                                     </div>
                                     <div class="flex items-start gap-2">
                                         <span class="text-blue-400">2.</span>
-                                        <span>İNTERNET BAĞLANTISINI VE <strong>GITHUB</strong> ERİŞİMİNİ TEYİT EDİN.</span>
+                                        <span>İNTERNET BAĞLANTISINI VE <strong>OPENROUTER</strong> ERİŞİMİNİ TEYİT EDİN.</span>
                                     </div>
                                 </div>
                                 <div class="mt-5 pt-4 border-t border-white/5 flex gap-2">
