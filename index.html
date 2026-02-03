@@ -836,9 +836,9 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`,
+                            'Authorization': 'Bearer ' + apiKey,
                             'HTTP-Referer': 'https://defaultspace.github.io/ServisBot-AI/',
-                            'X-Title': 'ServisBot AI'
+                            'X-Title': 'ServisBotAI'
                         },
                         body: JSON.stringify({
                             model: this.config.aiModel,
@@ -1208,13 +1208,20 @@
             },
 
             loadSettings: function () {
-                const settings = JSON.parse(localStorage.getItem(this.config.settingsKey) || '{"techName": "H. EMREHAN", "apiKey": "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"}');
-                this.settings = settings; // Ensure this.settings is updated
+                const defaultKey = "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";
+                const settings = JSON.parse(localStorage.getItem(this.config.settingsKey) || `{"techName": "H. EMREHAN", "apiKey": "${defaultKey}"}`);
+
+                // Eski veya geçersiz key varsa otomatik güncelle
+                if (!settings.apiKey || settings.apiKey.includes('6053b90d7e58eea29eb8be9180a665a42ec4ab629e39ba893010753be56e237f')) {
+                    settings.apiKey = defaultKey;
+                    localStorage.setItem(this.config.settingsKey, JSON.stringify(settings));
+                }
+
+                this.settings = settings;
                 document.getElementById('technician-name-label').textContent = `TEKNİSYEN: ${settings.techName} `;
                 document.getElementById('profile-tech-name').textContent = settings.techName;
                 document.getElementById('setting-tech-name').value = settings.techName;
                 document.getElementById('setting-api-key').value = settings.apiKey;
-                this.settings = settings;
             },
 
             saveSettings: function () {
@@ -1226,7 +1233,7 @@
                 document.getElementById('technician-name-label').textContent = `TEKNİSYEN: ${techName}`;
                 document.getElementById('profile-tech-name').textContent = techName;
                 alert("Ayarlar kaydedildi usta!");
-                this.listModels(); // Kayıt sonrası model listesini tazele
+                this.logAiModel(); // Kayıt sonrası aktif modeli logla
                 this.switchPage('home');
             },
 
@@ -1582,9 +1589,9 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKeyToUse}`,
+                            'Authorization': 'Bearer ' + apiKeyToUse,
                             'HTTP-Referer': 'https://defaultspace.github.io/ServisBot-AI/',
-                            'X-Title': 'ServisBot AI'
+                            'X-Title': 'ServisBotAI'
                         },
                         body: JSON.stringify({
                             model: this.config.aiModel,
