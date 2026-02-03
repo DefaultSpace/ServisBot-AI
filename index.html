@@ -1537,9 +1537,10 @@
                     ];
 
                     const models = [
-                        { name: 'gemini-1.5-flash-latest', api: 'v1beta' },
                         { name: 'gemini-1.5-flash', api: 'v1' },
-                        { name: 'gemini-1.5-pro', api: 'v1' }
+                        { name: 'gemini-1.5-flash', api: 'v1beta' },
+                        { name: 'gemini-2.0-flash-exp', api: 'v1beta' },
+                        { name: 'gemini-1.5-pro', api: 'v1beta' }
                     ];
 
                     let response;
@@ -1555,7 +1556,7 @@
 
                         for (const modelObj of models) {
                             try {
-                                console.log(`AI Deneniyor: ${modelObj.name} (${proxy ? 'Proxy' : 'Direkt'})`);
+                                console.log(`AI Deneniyor: ${modelObj.name} (${proxy ? 'Proxy' : 'Direkt'}) [${modelObj.api}]`);
                                 response = await tryAi(modelObj.name, proxy, modelObj.api);
 
                                 if (response.ok) {
@@ -1563,8 +1564,9 @@
                                     break;
                                 } else {
                                     const errData = await response.json().catch(() => ({}));
-                                    console.warn(`AI Sinyal Hatası (${modelObj.name}): ${response.status}`, errData);
-                                    lastError = new Error(errData.error?.message || `HTTP ${response.status}`);
+                                    const errMsg = errData.error?.message || `HTTP ${response.status}`;
+                                    console.warn(`AI Sinyal Hatası (${modelObj.name}): ${errMsg}`);
+                                    lastError = new Error(`${modelObj.name} [${modelObj.api}]: ${errMsg}`);
                                 }
                             } catch (e) {
                                 console.error(`AI Bağlantı Hatası (${modelObj.name}):`, e.message);
@@ -1577,7 +1579,7 @@
                     if (!successModel) {
                         let errorMsg = lastError?.message || "Bağlantı kurulamadı.";
                         if (isLocalFile) {
-                            errorMsg += " (Not: Uygulamayı 'file://' üzerinden çalıştırdığınız için CORS engeli oluşuyor olabilir. GitHub sayfasından kullanmayı deneyin.)";
+                            errorMsg += " (CORS engeli oluştu. Lütfen GitHub üzerinden kullanın.)";
                         }
                         throw new Error(errorMsg);
                     }
