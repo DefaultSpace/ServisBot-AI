@@ -837,7 +837,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${apiKey}`,
-                            'HTTP-Referer': window.location.origin,
+                            'HTTP-Referer': 'https://defaultspace.github.io/ServisBot-AI/',
                             'X-Title': 'ServisBot AI'
                         },
                         body: JSON.stringify({
@@ -1209,6 +1209,7 @@
 
             loadSettings: function () {
                 const settings = JSON.parse(localStorage.getItem(this.config.settingsKey) || '{"techName": "H. EMREHAN", "apiKey": "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"}');
+                this.settings = settings; // Ensure this.settings is updated
                 document.getElementById('technician-name-label').textContent = `TEKNİSYEN: ${settings.techName} `;
                 document.getElementById('profile-tech-name').textContent = settings.techName;
                 document.getElementById('setting-tech-name').value = settings.techName;
@@ -1582,7 +1583,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${apiKeyToUse}`,
-                            'HTTP-Referer': window.location.origin,
+                            'HTTP-Referer': 'https://defaultspace.github.io/ServisBot-AI/',
                             'X-Title': 'ServisBot AI'
                         },
                         body: JSON.stringify({
