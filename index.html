@@ -1506,8 +1506,8 @@
                         <span class="text-xs font-black text-indigo-400 uppercase tracking-widest italic">AI Analiz Ediyor...</span>
                     </div>`;
 
-                const tryAi = async (modelName, proxy = null) => {
-                    const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.settings.apiKey}`;
+                const tryAi = async (modelName, proxy = null, apiVersion = 'v1beta') => {
+                    const baseUrl = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${this.settings.apiKey}`;
                     const url = proxy ? `${proxy}${encodeURIComponent(baseUrl)}` : baseUrl;
 
                     const response = await fetch(url, {
@@ -1520,75 +1520,71 @@
                                 }]
                             }]
                         }),
-                        signal: AbortSignal.timeout(10000)
+                        signal: AbortSignal.timeout(12000) // 12 saniye limit
                     });
                     return response;
                 };
 
                 try {
-                    // Gelişmiş CORS proxy seçenekleri - 2026 güncel
+                    // Protocol check for CORS warning
+                    const isLocalFile = window.location.protocol === 'file:';
+
                     const proxies = [
-                        'https://api.codetabs.com/v1/proxy?quest=',  // En güvenilir
-                        'https://api.allorigins.win/raw?url=',        // Yedek 1
-                        'https://corsproxy.io/?',                     // Yedek 2
-                        null                                          // Son çare: direkt deneme
+                        'https://api.codetabs.com/v1/proxy?quest=',  // Stabil
+                        'https://api.allorigins.win/raw?url=',        // Güvenilir
+                        'https://corsproxy.io/?',                     // Alternatif
+                        null                                          // Direkt (Sadece HTTPS/Server için)
                     ];
 
-                    // Güncel model isimleri (Ocak 2026) - sırayla dene
                     const models = [
-                        'gemini-1.5-flash',            // En stabil
-                        'gemini-1.5-pro',              // Güçlü model
-                        'gemini-pro'                   // Fallback
+                        { name: 'gemini-1.5-flash-latest', api: 'v1beta' },
+                        { name: 'gemini-1.5-flash', api: 'v1' },
+                        { name: 'gemini-1.5-pro', api: 'v1' }
                     ];
 
                     let response;
                     let lastError;
                     let successModel = null;
 
-                    // Her proxy için her modeli dene
+                    // Her proxy için modelleri dene
                     for (const proxy of proxies) {
                         if (successModel) break;
 
-                        for (const model of models) {
+                        // Yerel dosyada direkt bağlantı genellikle başarısız olur, atla
+                        if (isLocalFile && proxy === null) continue;
+
+                        for (const modelObj of models) {
                             try {
-                                console.log(`Deneniyor: ${model} ${proxy ? 'proxy ile' : 'direkt'}`);
-                                response = await tryAi(model, proxy);
+                                console.log(`AI Deneniyor: ${modelObj.name} (${proxy ? 'Proxy' : 'Direkt'})`);
+                                response = await tryAi(modelObj.name, proxy, modelObj.api);
 
                                 if (response.ok) {
-                                    successModel = model;
-                                    console.log(`✅ Başarılı: ${model} ${proxy ? 'proxy ile' : 'direkt'}`);
+                                    successModel = modelObj.name;
                                     break;
-                                } else if (response.status === 429) {
-                                    console.warn(`⚠️ ${model} rate limited (429)`);
-                                    continue;
-                                } else if (response.status === 404) {
-                                    console.warn(`⚠️ ${model} bulunamadı (404)`);
-                                    continue;
-                                } else if (response.status === 400) {
-                                    const errData = await response.json().catch(() => ({}));
-                                    lastError = new Error(`API Hatası: ${errData.error?.message || 'Bilinmeyen hata'}`);
-                                    console.error(`❌ ${model} hatası:`, errData);
-                                    continue;
                                 } else {
                                     const errData = await response.json().catch(() => ({}));
-                                    lastError = new Error(`HTTP ${response.status}: ${errData.error?.message || 'Bilinmeyen hata'}`);
+                                    console.warn(`AI Sinyal Hatası (${modelObj.name}): ${response.status}`, errData);
+                                    lastError = new Error(errData.error?.message || `HTTP ${response.status}`);
                                 }
                             } catch (e) {
-                                console.error(`❌ ${model} bağlantı hatası:`, e.message);
+                                console.error(`AI Bağlantı Hatası (${modelObj.name}):`, e.message);
                                 lastError = e;
                                 continue;
                             }
                         }
                     }
 
-                    if (!response || !response.ok) {
-                        throw lastError || new Error("Tüm AI modelleri şu an kullanılamıyor. CORS veya API anahtarı sorunu olabilir.");
+                    if (!successModel) {
+                        let errorMsg = lastError?.message || "Bağlantı kurulamadı.";
+                        if (isLocalFile) {
+                            errorMsg += " (Not: Uygulamayı 'file://' üzerinden çalıştırdığınız için CORS engeli oluşuyor olabilir. GitHub sayfasından kullanmayı deneyin.)";
+                        }
+                        throw new Error(errorMsg);
                     }
 
                     const data = await response.json();
-
-                    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                        throw new Error("AI yanıt vermedi. Farklı bir soru dene.");
+                    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        throw new Error("AI geçerli bir yanıt oluşturamadı.");
                     }
 
                     let aiText = data.candidates[0].content.parts[0].text;
@@ -1604,14 +1600,14 @@
                                     <i data-lucide="brain-circuit" class="w-4 h-4"></i>
                                 </div>
                                 <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">AI Teknik Raporu</span>
-                                ${successModel ? `<span class="text-[8px] text-slate-600 italic">(${successModel})</span>` : ''}
+                                <span class="text-[8px] text-slate-600 italic">(${successModel})</span>
                             </div>
                             <div class="text-sm leading-relaxed font-bold text-slate-200 whitespace-pre-line">${aiText}</div>
                         </div>`;
                     this.saveToHistory('🧠 AI Analiz', query);
                     lucide.createIcons();
                 } catch (e) {
-                    console.error("AI_ERROR:", e);
+                    console.error("AI_FINAL_ERROR:", e);
                     resultsDiv.innerHTML = `
                         <div class="p-8 bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-[2.5rem]">
                             <div class="text-center mb-5">
@@ -1623,28 +1619,31 @@
                             <div class="bg-slate-900/50 p-6 rounded-2xl border border-white/5">
                                 <div class="flex items-center gap-2 mb-4">
                                     <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400"></i>
-                                    <p class="text-[10px] text-amber-400 font-black uppercase">Alternatif Çözüm</p>
+                                    <p class="text-[10px] text-amber-400 font-black uppercase">Çözüm Önerileri</p>
                                 </div>
                                 <div class="space-y-3 text-[10px] text-slate-300">
                                     <div class="flex items-start gap-2">
-                                        <span class="text-green-400 font-black">✓</span>
-                                        <span class="font-semibold">Yukarıdaki <strong class="text-white">Arıza Çözüm Merkezi'ni</strong> kullanarak hata kodunu arayın.</span>
+                                        <span class="text-green-400 font-black">1.</span>
+                                        <span>Uygulamayı <strong>GitHub üzerinden</strong> (https://...) çalıştırın. Yerel dosyalarda CORS engeli sık yaşanır.</span>
                                     </div>
                                     <div class="flex items-start gap-2">
-                                        <span class="text-blue-400 font-black">•</span>
-                                        <span>Tarayıcı güvenlik ayarları API bağlantısını engelliyor olabilir.</span>
+                                        <span class="text-blue-400 font-black">2.</span>
+                                        <span>API anahtarınızın doğru ve aktif olduğundan emin olun.</span>
                                     </div>
                                     <div class="flex items-start gap-2">
-                                        <span class="text-blue-400 font-black">•</span>
-                                        <span>API kullanım kotası dolmuş olabilir.</span>
+                                        <span class="text-blue-400 font-black">3.</span>
+                                        <span>İnternet bağlantınızı kontrol edin veya bir süre sonra tekrar deneyin.</span>
                                     </div>
                                 </div>
-                                <div class="mt-5 pt-4 border-t border-white/5">
+                                <div class="mt-5 pt-4 border-t border-white/5 flex gap-2">
                                     <a href="https://aistudio.google.com/app/apikey" target="_blank" 
-                                       class="inline-flex items-center gap-2 text-[9px] font-bold text-blue-400 hover:text-blue-300 transition-colors border border-blue-500/20 px-4 py-2.5 rounded-full bg-blue-500/5 hover:bg-blue-500/10">
-                                        <i data-lucide="key" class="w-3 h-3"></i>
-                                        API Anahtarını Yenile
+                                       class="flex-1 bg-blue-500/10 border border-blue-500/20 py-3 rounded-xl text-[9px] font-bold text-blue-400 text-center">
+                                        Anahtar Al
                                     </a>
+                                    <button onclick="app.switchPage('settings')" 
+                                       class="flex-1 bg-white/5 border border-white/10 py-3 rounded-xl text-[9px] font-bold text-slate-400">
+                                        Ayarlara Git
+                                    </button>
                                 </div>
                             </div>
                         </div>`;
