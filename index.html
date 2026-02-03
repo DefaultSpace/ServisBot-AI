@@ -325,8 +325,6 @@
                 <h2 class="text-3xl font-black tracking-tighter italic">GEÇMİŞ <span
                         class="text-blue-500">KAYITLAR</span></h2>
                 <div class="flex gap-2">
-                    <button onclick="app.showCustomers()"
-                        class="text-[10px] font-black text-green-400 uppercase tracking-widest bg-green-500/10 px-4 py-2 rounded-full border border-green-500/20 active:scale-90 transition-all">Müşteriler</button>
                     <button onclick="app.clearHistory()"
                         class="text-[10px] font-black text-red-400 uppercase tracking-widest bg-red-500/10 px-4 py-2 rounded-full border border-red-500/20 active:scale-90 transition-all">Temizle</button>
                 </div>
@@ -508,75 +506,6 @@
                 </div>
             </div>
 
-            <!-- Customer List Modal Overlay -->
-            <div id="customer-list-modal"
-                class="hidden fixed inset-0 z-[200] bg-[#020617]/95 backdrop-blur-xl animate-in fade-in duration-300 overflow-y-auto">
-                <div class="p-6 pb-20 max-w-xl mx-auto">
-                    <div class="flex justify-between items-center mb-8 sticky top-0 bg-[#020617]/80 py-4 z-10">
-                        <div>
-                            <h2 class="text-2xl font-black italic text-white uppercase tracking-tighter">KAYITLI <span
-                                    class="text-green-500">MÜŞTERİLER</span></h2>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Sistemdeki
-                                Tüm Kayıtlar</p>
-                        </div>
-                        <button onclick="document.getElementById('customer-list-modal').classList.add('hidden')"
-                            class="p-3 bg-white/5 rounded-2xl text-slate-400 hover:text-white transition-colors">
-                            <i data-lucide="x" class="w-6 h-6"></i>
-                        </button>
-                    </div>
-                    <div id="customer-list-container" class="space-y-4">
-                        <!-- Customers will be rendered here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- History Detail Modal -->
-            <div id="history-detail-modal"
-                class="hidden fixed inset-0 z-[200] bg-[#020617]/95 backdrop-blur-xl animate-in fade-in duration-300 flex items-center justify-center px-4">
-                <div
-                    class="bg-[#0f172a] border border-white/10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative">
-                    <button onclick="document.getElementById('history-detail-modal').classList.add('hidden')"
-                        class="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-slate-400 hover:text-white">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-
-                    <div class="text-center mb-6">
-                        <div
-                            class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-400">
-                            <i data-lucide="file-text" class="w-8 h-8"></i>
-                        </div>
-                        <h3 class="text-xl font-black text-white tracking-tight uppercase">İşlem Detayı</h3>
-                        <p id="modal-date" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
-                            ...</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
-                            <span
-                                class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Müşteri</span>
-                            <p id="modal-client" class="text-sm font-bold text-white">...</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
-                                <span
-                                    class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Cihaz</span>
-                                <p id="modal-device" class="text-xs font-bold text-slate-300">...</p>
-                            </div>
-                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
-                                <span
-                                    class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Durum</span>
-                                <p id="modal-type" class="text-xs font-bold text-slate-300">...</p>
-                            </div>
-                        </div>
-                        <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
-                            <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Not
-                                / Detay</span>
-                            <p id="modal-note" class="text-xs font-medium text-slate-400 leading-relaxed">...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <button onclick="app.resetStats()"
                 class="w-full py-4 rounded-3xl border border-white/5 text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-red-400 hover:bg-red-500/5 transition-all">
                 Aylık Metrikleri Sıfırla
@@ -680,13 +609,84 @@
                 </button>
             </section>
 
-            <section class="p-4 text-center">
-                <p class="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Software Version 2.0.0</p>
-                <p class="text-[8px] text-slate-700 mt-1 uppercase">Coded for Hüseyin Emrehan</p>
-            </section>
         </div>
 
     </main>
+
+    <!-- Global Modals -->
+    <!-- Customer List Modal Overlay -->
+    <div id="customer-list-modal"
+        class="hidden fixed inset-0 z-[200] bg-[#020617]/95 backdrop-blur-xl animate-in fade-in duration-300 overflow-y-auto">
+        <div class="p-6 pb-20 max-w-xl mx-auto">
+            <div class="flex justify-end items-center mb-8 sticky top-0 bg-[#020617]/80 py-4 z-10">
+                <button onclick="document.getElementById('customer-list-modal').classList.add('hidden')"
+                    class="p-3 bg-white/5 rounded-2xl text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="customer-list-container" class="space-y-4">
+                <!-- Customers will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- History Detail Modal -->
+    <div id="history-detail-modal"
+        class="hidden fixed inset-0 z-[200] bg-[#020617]/95 backdrop-blur-xl animate-in fade-in duration-300 flex items-center justify-center px-4">
+        <div
+            class="bg-[#0f172a] border border-blue-500/20 w-full max-w-md rounded-[2.5rem] p-8 shadow-[0_0_50px_rgba(59,130,246,0.15)] relative">
+            <button onclick="document.getElementById('history-detail-modal').classList.add('hidden')"
+                class="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-slate-400 hover:text-white active:scale-95 transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center mb-8">
+                <div
+                    class="w-20 h-20 bg-blue-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-4 text-blue-400 shadow-inner">
+                    <i data-lucide="contact" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-2xl font-black text-white tracking-tighter uppercase italic">Müşteri Detayı</h3>
+                <div class="flex items-center justify-center gap-2 mt-1">
+                    <span class="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em]">Servis Kayıt Bilgisi</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10">
+                    <span
+                        class="text-[8px] text-blue-400 font-black uppercase tracking-widest block mb-1">Müşteri</span>
+                    <p id="modal-client" class="text-lg font-black text-white uppercase tracking-tight">...</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                        <span
+                            class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Telefon</span>
+                        <p id="modal-phone" class="text-xs font-bold text-slate-300">...</p>
+                    </div>
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                        <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Mesaj
+                            Türü</span>
+                        <p id="modal-type" class="text-xs font-bold text-blue-400">...</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                    <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-1">Zaman
+                        Damgası</span>
+                    <p id="modal-date" class="text-xs font-bold text-slate-300">...</p>
+                </div>
+
+                <div class="bg-slate-950/50 p-5 rounded-2xl border border-white/5">
+                    <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest block mb-2">İşlem
+                        Detayları</span>
+                    <p id="modal-note"
+                        class="text-[11px] font-medium text-slate-400 leading-relaxed whitespace-pre-line">...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Navigation / Floating Bar Style -->
     <div class="fixed bottom-8 left-0 right-0 z-[100] px-6 max-w-xl mx-auto">
@@ -950,7 +950,7 @@
                 };
 
                 localStorage.setItem(this.config.customersKey, JSON.stringify(customers));
-                this.saveToHistory('📋 Kayıt', `${name || phone} - ${status}`);
+                this.saveToHistory('📋 Kayıt', name || phone, phone, status);
 
                 if (status === 'COMPLETED') {
                     this.incrementStat('addresses');
@@ -1003,7 +1003,6 @@
 
                 // Sort by date (descending) - this is approximate as we only have string dates
                 const sortedKeys = Object.keys(customers).reverse();
-
                 container.innerHTML = sortedKeys.map(phone => {
                     const c = customers[phone];
                     const statusColor = {
@@ -1014,7 +1013,8 @@
                     }[c.status] || 'text-slate-400 bg-slate-500/10';
 
                     return `
-                        <div class="glass-card p-6 rounded-[2.5rem] border-l-4 ${statusColor.split(' ')[0].replace('text', 'border')} space-y-4">
+                        <div onclick="app.showCustomerDetail('${phone}')" 
+                             class="glass-card p-6 rounded-[2.5rem] border-l-4 ${statusColor.split(' ')[0].replace('text', 'border')} space-y-4 cursor-pointer active:scale-95 transition-all">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="text-lg font-black text-white tracking-tight leading-none">${c.name || 'İsimsiz Müşteri'}</h3>
@@ -1044,16 +1044,15 @@
                             <div class="flex justify-between items-center pt-2">
                                 <div class="text-[8px] text-slate-600 font-bold uppercase tracking-widest">${c.date}</div>
                                 <div class="flex gap-2">
-                                    <button onclick="app.callCustomer('${phone}')" class="p-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all">
+                                    <button onclick="event.stopPropagation(); app.callCustomer('${phone}')" class="p-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all">
                                         <i data-lucide="phone" class="w-4 h-4"></i>
                                     </button>
-                                    <button onclick="app.deleteCustomer('${phone}')" class="p-2 bg-red-500/20 text-red-500 rounded-xl hover:bg-red-500/30 transition-all">
+                                    <button onclick="event.stopPropagation(); app.deleteCustomer('${phone}')" class="p-2 bg-red-500/20 text-red-500 rounded-xl hover:bg-red-500/30 transition-all">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }).join('');
                 lucide.createIcons();
             },
@@ -1094,7 +1093,7 @@
                 document.getElementById('lib-code').value = '';
                 document.getElementById('lib-price').value = '';
                 this.loadStats();
-                this.libSearch(model);
+                // Otomatik arama kaldırıldı - kullanıcı sadece manuel arayınca sonuçları görecek
             },
 
             libSearch: function (targetModel = null) {
@@ -1143,7 +1142,7 @@
 
             loadSettings: function () {
                 const settings = JSON.parse(localStorage.getItem(this.config.settingsKey) || '{"techName": "H. EMREHAN", "apiKey": "AIzaSyCsbBWTBmjl25QVW6cuJpF9WgrCfIbFv4I"}');
-                document.getElementById('technician-name-label').textContent = `TEKNİSYEN: ${settings.techName}`;
+                document.getElementById('technician-name-label').textContent = `TEKNİSYEN: ${settings.techName} `;
                 document.getElementById('profile-tech-name').textContent = settings.techName;
                 document.getElementById('setting-tech-name').value = settings.techName;
                 document.getElementById('setting-api-key').value = settings.apiKey;
@@ -1268,7 +1267,7 @@
                 const status = document.getElementById('current-status').value;
                 const client = document.getElementById('customerName').value.trim() || phone;
 
-                this.saveToHistory(`📞 ${status}`, client);
+                this.saveToHistory('📞 WhatsApp', client, phone, status);
                 this.saveToLastSent(phone, client, messageText);
 
                 window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(messageText)}`;
@@ -1652,40 +1651,64 @@
                 }
             },
 
-            saveToHistory: function (type, val, clientOverride = null) {
+            saveToHistory: function (type, content, phone = null, status = null) {
                 let history = JSON.parse(localStorage.getItem(this.config.storageKey) || "[]");
 
-                // Detay verileri formdan çek
                 const device = document.getElementById('deviceType').value.trim() || '---';
                 const noteContent = document.getElementById('note-content').value.trim() || 'Not yok.';
-                const client = clientOverride || document.getElementById('customerName').value.trim() || 'Bilinmeyen Müşteri';
+                const clientName = document.getElementById('customerName').value.trim() || content || 'Bilinmeyen Müşteri';
+                const currentPhone = phone || document.getElementById('phoneInput').value.replace(/\D/g, '');
+                const currentStatus = status || document.getElementById('current-status').value;
 
                 const newItem = {
                     type,
-                    val,
-                    client,     // Müşteri İsmi (Ayrı tutalım)
-                    device,     // Cihaz Detayı
-                    note: noteContent,   // Ekstra Notlar
-                    hasReminder: false,  // VarsayılanReminder yok
+                    val: content,
+                    client: clientName,
+                    phone: currentPhone,
+                    status: currentStatus,
+                    device,
+                    note: noteContent,
+                    hasReminder: false,
                     time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-                    date: new Date().toLocaleDateString('tr-TR')
+                    date: new Date().toLocaleDateString('tr-TR'),
+                    timestamp: new Date().toLocaleString('tr-TR')
                 };
                 history.unshift(newItem);
                 localStorage.setItem(this.config.storageKey, JSON.stringify(history.slice(0, 40)));
             },
 
-            showHistoryDetail: function (idx) {
-                const data = JSON.parse(localStorage.getItem(this.config.storageKey) || "[]");
-                const item = data[idx];
-                if (!item) return;
+            getStatusLabel: function (status) {
+                const labels = {
+                    COMING: 'YOLDAYIM',
+                    COMPLETED: 'TAMAMLANDI',
+                    PENDING_PART: 'PARÇA BEKLENİYOR',
+                    WARRANTY: 'GARANTİ',
+                    SURVEY: 'ANKET'
+                };
+                return labels[status] || (status ? status.toUpperCase() : 'BİLİNMİYOR');
+            },
 
-                document.getElementById('modal-date').textContent = `${item.date} - ${item.time}`;
-                document.getElementById('modal-client').textContent = item.client || item.val;
-                document.getElementById('modal-device').textContent = item.device || "---";
-                document.getElementById('modal-type').textContent = item.type;
-                document.getElementById('modal-note').textContent = item.note || "Ek not bulunmuyor.";
+            showCustomerDetail: function (id, isIndex = false) {
+                let data;
+                if (isIndex) {
+                    const history = JSON.parse(localStorage.getItem(this.config.storageKey) || "[]");
+                    data = history[id];
+                } else {
+                    const customers = JSON.parse(localStorage.getItem(this.config.customersKey) || "{}");
+                    data = customers[id];
+                    if (data) data.phone = id;
+                }
+
+                if (!data) return;
+
+                document.getElementById('modal-date').textContent = data.timestamp || data.date || '---';
+                document.getElementById('modal-client').textContent = data.client || data.name || 'İsimsiz';
+                document.getElementById('modal-phone').textContent = data.phone || '---';
+                document.getElementById('modal-type').textContent = this.getStatusLabel(data.status);
+                document.getElementById('modal-note').textContent = `Cihaz: ${data.device || '-'}\n${data.enr ? `Model: ${data.enr}\n` : ''}${data.changedPart ? `Parça: ${data.changedPart}\n` : ''}\nNot: ${data.note || data.content || 'Yok'}`;
 
                 document.getElementById('history-detail-modal').classList.remove('hidden');
+                lucide.createIcons();
             },
 
             renderHistory: function () {
@@ -1702,7 +1725,7 @@
                 }
 
                 list.innerHTML = data.map((item, idx) => `
-                    <div onclick="app.showHistoryDetail(${idx})" 
+                    <div onclick="app.showCustomerDetail(${idx}, true)" 
                         class="glass-card p-5 rounded-3xl flex justify-between items-center border-l-4 ${item.type.includes('📞') ? 'border-green-500' : 'border-indigo-500'} group cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden">
                         
                         ${item.hasReminder ? `<div class="absolute top-0 right-0 bg-blue-600 p-2 rounded-bl-2xl shadow-lg"><i data-lucide="bell" class="w-3 h-3 text-white animate-pulse"></i></div>` : ''}
