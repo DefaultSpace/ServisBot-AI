@@ -324,8 +324,12 @@
             <div class="flex justify-between items-center px-4">
                 <h2 class="text-3xl font-black tracking-tighter italic">GEÇMİŞ <span
                         class="text-blue-500">KAYITLAR</span></h2>
-                <button onclick="app.clearHistory()"
-                    class="text-[10px] font-black text-red-400 uppercase tracking-widest bg-red-500/10 px-4 py-2 rounded-full border border-red-500/20 active:scale-90 transition-all">Temizle</button>
+                <div class="flex gap-2">
+                    <button onclick="app.showCustomers()"
+                        class="text-[10px] font-black text-green-400 uppercase tracking-widest bg-green-500/10 px-4 py-2 rounded-full border border-green-500/20 active:scale-90 transition-all">Müşteriler</button>
+                    <button onclick="app.clearHistory()"
+                        class="text-[10px] font-black text-red-400 uppercase tracking-widest bg-red-500/10 px-4 py-2 rounded-full border border-red-500/20 active:scale-90 transition-all">Temizle</button>
+                </div>
             </div>
             <div id="historyList" class="space-y-4"></div>
         </div>
@@ -494,12 +498,9 @@
                     <span id="stat-parts" class="text-3xl font-black text-white block">0</span>
                     <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Değişen Parça</span>
                 </div>
-                <div onclick="app.showCustomers()"
-                    class="glass-card p-6 rounded-[2.5rem] border-green-500/10 text-center cursor-pointer active:scale-95 transition-all">
+                <div class="glass-card p-6 rounded-[2.5rem] border-green-500/10 text-center">
                     <span id="stat-customers" class="text-3xl font-black text-green-400 block">0</span>
                     <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Kayıtlı Müşteri</span>
-                    <div class="text-[7px] text-green-500/60 font-bold uppercase mt-1">Listeyi Gör <i
-                            data-lucide="external-link" class="w-2 h-2 inline"></i></div>
                 </div>
                 <div class="glass-card p-6 rounded-[2.5rem] border-purple-500/10 text-center">
                     <span id="stat-lib-parts" class="text-3xl font-black text-white block">0</span>
