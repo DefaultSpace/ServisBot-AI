@@ -1,0 +1,16 @@
+{
+    "name": "servisbot-ai",
+    "version": "2.0.0",
+    "description": "ServisBot AI - Technical Support Assistant",
+    "private": true,
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "pwa",
+        "ai",
+        "service"
+    ],
+    "author": "Hüseyin Emrehan",
+    "license": "MIT"
+}
